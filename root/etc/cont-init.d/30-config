@@ -8,6 +8,35 @@ mkdir -p \
 [[ ! -e /config/scripts ]] && \
 	cp -R /defaults/scripts /config/
 
+if [ ! -e /config/keys/RSA2048.pem ]; then
+	openssl dhparam -out /config/keys/RSA2048.pem -5 2048
+fi
+
+function generate_domoticz_certificate {
+	echo Generate Domoticz Certificate from Letsencrypt
+	md5sum /etc/letsencrypt/live/$DOMAIN/fullchain.pem > /config/fullchain.pem.md5
+	cat /etc/letsencrypt/live/$DOMAIN/privkey.pem >> /config/keys/server_cert.pem
+	cat /etc/letsencrypt/live/$DOMAIN/fullchain.pem >> /config/keys/server_cert.pem
+	cat /config/keys/RSA2048.pem >> /config/keys/server_cert.pem
+}
+
+if [ ! -e /config/keys/server_cert.pem ]; then
+	if [ -e /etc/letsencrypt/live/$DOMAIN/cert.pem ]; then
+		export TEST_RUN="LETSENCRYPT"
+		generate_domoticz_certificate
+	fi
+fi
+
+if [ -e /config/fullchain.pem.md5 ]; then
+	if md5sum --status -c /config/fullchain.pem.md5; then
+        echo Certificate OK
+	else
+        echo Certificate MODIFIED
+		generate_domoticz_certificate
+	fi
+
+fi
+
 # generate ssl certificate
 if [ -z ${TEST_RUN+x} ]; then
 	if [ ! -e /config/keys/server_cert.pem ]; then

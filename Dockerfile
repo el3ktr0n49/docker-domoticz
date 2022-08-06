@@ -9,25 +9,48 @@ LABEL maintainer="saarg"
 
 # environment settings
 ARG DEBIAN_FRONTEND="noninteractive"
-ENV HOME="/config"
+ENV HOME="/config" \
+# LANG="fr_FR.UTF-8" \
+# LANGUAGE="fr_FR.UTF-8" \
+DOMAIN="ratons.ovh"
 
 
 RUN \
  echo "**** install runtime packages ****" && \
+ #apt list --installed && \
+#  locale-gen fr_FR.UTF-8 && \
+# dpkg --get-selections && \
+apt-cache policy libc6 && \
+apt-cache policy libc6-dev && \
+echo "libc6 hold" | dpkg --set-selections && \
  apt-get update && \
+#  apt-get install --yes --allow-change-held-packages libc6 && \
+#  apt-get install -y -q debconf-utils && \
+#  echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections && \
+#  apt-get install -y -q && \
+ apt-get install -y libc-dev-bin=2.31-0ubuntu9.7 libc6-dev=2.31-0ubuntu9.7 && \
+#  apt-get install -y --reinstall libc6 && apt-get install -f && \
+ apt-get upgrade -y && \
  apt-get install -y --no-install-recommends \
+	build-essential \
 	curl \
 	cron \
-	libc6 \
+	anacron \
+	# libc6 \
 	libcap2-bin \
 	libcurl3-gnutls \
 	libcurl4 \
+	libcurl4-openssl-dev \
+	libusb-dev \
+	zlib1g-dev \
+	libssl-dev \
 	libpython3.8 \
 	libudev-dev \
 	libusb-0.1-4 \
 	mosquitto-clients \
 	python3-pip \
 	python3-requests \
+	python3-dev \
 	unzip \
 	wget \
 	zlib1g && \
